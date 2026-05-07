@@ -5,19 +5,24 @@ from powerhint_json.models import DefaultGetter, Node
 
 
 def create_node(name: str, path: str, values: set[str]) -> Node:
+    def safe_default_getter(path: str, _values: set[str]) -> str:
+        try:
+            result = subprocess.run(
+                ['adb', 'shell', 'cat', path],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError:
+            print(f'[WARN] Unable to read default value from {path}, using fallback 0')
+            return '0'
+
     return create_node_default(
         name,
         path,
         values,
-        lambda path, values: subprocess.check_output(
-            [
-                'adb',
-                'shell',
-                'cat',
-                path,
-            ],
-            text=True,
-        ).strip(),
+        safe_default_getter,
     )
 
 

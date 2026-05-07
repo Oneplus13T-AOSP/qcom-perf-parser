@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # commonresourceconfigs.xml and targetresourceconfigs.xml map the resource major/minor to paths
     resource_config: ResourceConfig = resourceconfigs.parse_base_config(commonresourceconfigs_path)
-    resourceconfigs.apply_overrides(resource_config, targetresourceconfigs_path)
+    resourceconfigs.apply_overrides(resource_config, targetresourceconfigs_path, argument.target)
 
     # targetinfo.xml contains information about the clusters
     targetconfigs = targetinfo.parse_target_info_xml(targetconfig_path)
@@ -73,6 +73,8 @@ if __name__ == '__main__':
     if target_info is None:
         print(f'unable to find target info for {argument.target}')
         sys.exit()
+
+    resourceconfigs.apply_target_quirks(resource_config, target_info)
 
     powerhint_map: List[Tuple[BoostKey, str]] = [
         ((0x00001206, None, None), 'SUSTAINED_PERFORMANCE'),
